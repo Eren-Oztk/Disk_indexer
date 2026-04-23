@@ -29,7 +29,34 @@
       color: var(--text);
       font-family: 'Segoe UI', system-ui, sans-serif;
       min-height: 100vh;
+      position: relative;
     }
+
+    /* ── YENİ: CPU / RAM / DISK Monitörü ── */
+    .hw-monitor {
+      position: fixed;
+      top: 80px; /* Navigasyonun altına denk gelsin */
+      right: 20px;
+      background: rgba(13, 17, 23, 0.85);
+      border: 1px solid var(--border);
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--text2);
+      text-align: right;
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+    }
+    .hw-monitor .hw-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 4px;
+    }
+    .hw-monitor .hw-row:last-child { margin-bottom: 0; }
+    .hw-val { font-weight: bold; color: var(--accent2); transition: color 0.3s; }
 
     /* ── Nav ─────────────────────────────────── */
     nav {
@@ -42,7 +69,7 @@
       top: 0;
       background: rgba(8,12,16,0.92);
       backdrop-filter: blur(10px);
-      z-index: 99;
+      z-index: 999;
     }
     nav .logo {
       font-family: 'Cascadia Code', 'Consolas', monospace;
@@ -133,6 +160,7 @@
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 24px 60px rgba(0,0,0,.5);
+      position: relative;
     }
     .window-bar {
       background: var(--surface2);
@@ -162,6 +190,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      position: relative;
     }
     .ui-title { color: #6c63ff; font-weight: 700; font-size: 0.95rem; letter-spacing: 1px; }
     .ui-input {
@@ -179,10 +208,14 @@
       color: #fff;
       border: none;
       border-radius: 6px;
-      padding: 5px 14px;
+      padding: 6px 14px;
       font-size: 0.8rem;
       font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
     }
+    .ui-btn-p:hover:not(:disabled) { background: #7d75ff; }
+    .ui-btn-p:disabled { background: #4a4a5a; color: #a0a0b0; cursor: wait; }
     .ui-btn-s {
       background: #2a2a35;
       color: #e8e8f0;
@@ -190,6 +223,19 @@
       border-radius: 6px;
       padding: 5px 10px;
       font-size: 0.8rem;
+      cursor: pointer;
+    }
+    
+    /* YENİ: Tarama İlerleme Çubuğu */
+    .scan-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      background: var(--accent2);
+      width: 0%;
+      transition: width 0.3s linear;
+      box-shadow: 0 0 10px var(--accent2);
     }
 
     /* Stats row */
@@ -202,7 +248,7 @@
     }
     .stat-item { padding: 4px 18px; text-align: center; border-right: 1px solid #35354a; }
     .stat-item:last-child { border-right: none; }
-    .stat-val { font-size: 1.1rem; font-weight: 600; }
+    .stat-val { font-size: 1.1rem; font-weight: 600; transition: color 0.3s; }
     .stat-lbl { font-size: 0.65rem; color: var(--text2); margin-top: 1px; }
 
     /* Table */
@@ -217,7 +263,7 @@
       letter-spacing: .5px;
       border-bottom: 1px solid #35354a;
     }
-    .ui-table td { padding: 6px 12px; border-bottom: 1px solid #1e1e28; }
+    .ui-table td { padding: 8px 12px; border-bottom: 1px solid #1e1e28; }
     .ui-table tr:nth-child(even) td { background: #22222a; }
     .tag-chip {
       display: inline-block;
@@ -226,25 +272,21 @@
       font-size: 0.7rem;
       font-weight: 600;
     }
+    
+    /* YENİ: Satır Animasyonu */
+    @keyframes slideDown { 
+      from { opacity: 0; transform: translateY(-5px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
+    .new-row { animation: slideDown 0.3s ease forwards; }
 
     /* ── Sections ────────────────────────────── */
     section { max-width: 900px; margin: 0 auto 80px; padding: 0 24px; }
-    section h2 {
-      font-size: 1.6rem;
-      font-weight: 700;
-      margin-bottom: 32px;
-      color: var(--text);
-    }
+    section h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: 32px; color: var(--text); }
     section h2 span { color: var(--accent); }
 
     .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 24px;
-      transition: border-color .2s, transform .15s;
-    }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; transition: border-color .2s, transform .15s; }
     .card:hover { border-color: var(--accent); transform: translateY(-2px); }
     .card-icon { font-size: 1.6rem; margin-bottom: 12px; }
     .card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
@@ -252,61 +294,53 @@
 
     /* Tags grid */
     .tags-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
-    .tag-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px;
-    }
+    .tag-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
     .tag-card .name { font-weight: 600; margin-bottom: 6px; }
     .tag-card .desc { font-size: 0.8rem; color: var(--text2); }
 
     /* Install block */
-    .install-block {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .install-block .tab-bar {
-      background: var(--surface2);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-    }
+    .install-block { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .install-block .tab-bar { background: var(--surface2); border-bottom: 1px solid var(--border); display: flex; }
     .tab { padding: 10px 20px; font-size: 0.85rem; cursor: pointer; color: var(--text2); }
     .tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
-    pre {
-      padding: 20px 24px;
-      font-family: 'Cascadia Code', 'Consolas', monospace;
-      font-size: 0.85rem;
-      line-height: 1.7;
-      overflow-x: auto;
-      color: var(--text);
-    }
-    .c-green { color: #7ee787; }
-    .c-dim   { color: var(--text2); }
-    .c-acc   { color: var(--accent); }
+    pre { padding: 20px 24px; font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 0.85rem; line-height: 1.7; overflow-x: auto; color: var(--text); }
+    .c-green { color: #7ee787; } .c-dim   { color: var(--text2); } .c-acc   { color: var(--accent); }
 
     /* ── Footer ──────────────────────────────── */
-    footer {
-      border-top: 1px solid var(--border);
-      text-align: center;
-      padding: 32px 24px;
-      color: var(--text2);
-      font-size: 0.82rem;
-    }
+    footer { border-top: 1px solid var(--border); text-align: center; padding: 32px 24px; color: var(--text2); font-size: 0.82rem; }
     footer a { color: var(--accent); text-decoration: none; }
+
+    @media (max-width: 768px) {
+      .hw-monitor { top: auto; bottom: 20px; right: 20px; transform: scale(0.85); transform-origin: bottom right; }
+    }
   </style>
 </head>
 <body>
 
-<!-- NAV -->
+<div class="hw-monitor" id="hwMonitor">
+  <div class="hw-row">
+    <span>SYSTEM</span>
+    <span style="color: var(--text);">QThread Worker</span>
+  </div>
+  <div class="hw-row">
+    <span>CPU USAGE</span>
+    <span><span id="cpuVal" class="hw-val" style="color: var(--green);">2</span> <span style="font-size: 10px;">%</span></span>
+  </div>
+  <div class="hw-row">
+    <span>RAM ALLOC</span>
+    <span><span id="ramVal" class="hw-val" style="color: var(--text);">45</span> <span style="font-size: 10px;">MB</span></span>
+  </div>
+  <div class="hw-row">
+    <span>DISK READ</span>
+    <span><span id="diskVal" class="hw-val" style="color: var(--green);">0.0</span> <span style="font-size: 10px;">MB/s</span></span>
+  </div>
+</div>
+
 <nav>
   <span class="logo">DISK-INDEXER</span>
   <a href="https://github.com/Eren-Oztk/disk-indexer">GitHub &rarr;</a>
 </nav>
 
-<!-- HERO -->
 <section class="hero">
   <div class="badge">v1.0.0 · Python + PyQt5</div>
   <h1>Disk Indeksi</h1>
@@ -318,35 +352,32 @@
   </div>
 </section>
 
-<!-- DEMO WINDOW -->
 <div class="demo-wrap">
   <div class="window">
     <div class="window-bar">
       <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
       <div class="window-title">Disk Indeksi — D:\Projeler</div>
     </div>
-    <!-- Toolbar -->
     <div class="ui-toolbar">
       <span class="ui-title">Disk Indeksi</span>
       <div class="ui-input">D:\Projeler</div>
       <button class="ui-btn-s">Klasor Sec</button>
-      <button class="ui-btn-p">&#9654; Tara</button>
+      <button class="ui-btn-p" id="scanBtn" onclick="startScan()">&#9654; Tara</button>
+      <div class="scan-progress" id="scanProgress"></div>
     </div>
-    <!-- Stats -->
     <div class="stats-row">
-      <div class="stat-item"><div class="stat-val" style="color:#8888a0">12</div><div class="stat-lbl">Toplam</div></div>
-      <div class="stat-item"><div class="stat-val" style="color:#00d4aa">5</div><div class="stat-lbl">Proje</div></div>
-      <div class="stat-item"><div class="stat-val" style="color:#5ba3ff">2</div><div class="stat-lbl">Arac</div></div>
-      <div class="stat-item"><div class="stat-val" style="color:#d47fd4">1</div><div class="stat-lbl">Belge</div></div>
-      <div class="stat-item"><div class="stat-val" style="color:#d4a04a">2</div><div class="stat-lbl">Medya</div></div>
-      <div class="stat-item"><div class="stat-val" style="color:#8888a0">2</div><div class="stat-lbl">Bilinmiyor</div></div>
+      <div class="stat-item"><div class="stat-val" id="valTotal" style="color:#8888a0">5</div><div class="stat-lbl">Toplam</div></div>
+      <div class="stat-item"><div class="stat-val" id="valProj" style="color:#00d4aa">2</div><div class="stat-lbl">Proje</div></div>
+      <div class="stat-item"><div class="stat-val" id="valTool" style="color:#5ba3ff">1</div><div class="stat-lbl">Arac</div></div>
+      <div class="stat-item"><div class="stat-val" id="valDoc" style="color:#d47fd4">1</div><div class="stat-lbl">Belge</div></div>
+      <div class="stat-item"><div class="stat-val" id="valMedia" style="color:#d4a04a">1</div><div class="stat-lbl">Medya</div></div>
+      <div class="stat-item"><div class="stat-val" id="valUnk" style="color:#8888a0">0</div><div class="stat-lbl">Bilinmiyor</div></div>
     </div>
-    <!-- Table -->
     <table class="ui-table">
       <thead>
         <tr><th>Ad</th><th>Yol</th><th>Etiket</th></tr>
       </thead>
-      <tbody>
+      <tbody id="tableBody">
         <tr><td>&#128193; disk-indexer</td><td>D:\Projeler\disk-indexer</td><td><span class="tag-chip" style="background:#1d4d3e;color:#00d4aa">Proje</span></td></tr>
         <tr><td>&#128193; web-scraper</td><td>D:\Projeler\web-scraper</td><td><span class="tag-chip" style="background:#1d4d3e;color:#00d4aa">Proje</span></td></tr>
         <tr><td>&#128196; VLC.exe</td><td>D:\Projeler\VLC.exe</td><td><span class="tag-chip" style="background:#1a2e4a;color:#5ba3ff">Arac</span></td></tr>
@@ -357,7 +388,6 @@
   </div>
 </div>
 
-<!-- FEATURES -->
 <section>
   <h2>Ozellikler <span>//</span></h2>
   <div class="cards">
@@ -384,7 +414,6 @@
   </div>
 </section>
 
-<!-- TAGS -->
 <section>
   <h2>Etiket Turleri <span>//</span></h2>
   <div class="tags-grid">
@@ -415,7 +444,6 @@
   </div>
 </section>
 
-<!-- INSTALL -->
 <section>
   <h2>Kurulum <span>//</span></h2>
   <div class="install-block">
@@ -435,12 +463,142 @@
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer>
   Built by <a href="https://github.com/Eren-Oztk">Eren-Oztk</a> &nbsp;&bull;&nbsp;
   <a href="https://github.com/Eren-Oztk/disk-indexer">GitHub</a> &nbsp;&bull;&nbsp;
   MIT License
 </footer>
+
+<script>
+  // Hardware Monitör
+  const cpuEl = document.getElementById('cpuVal');
+  const ramEl = document.getElementById('ramVal');
+  const diskEl = document.getElementById('diskVal');
+
+  let currentCpu = 2, targetCpu = 2;
+  let currentRam = 45, targetRam = 45;
+  let currentDisk = 0.0, targetDisk = 0.0;
+
+  setInterval(() => {
+    // Yumuşak Geçiş (Easing)
+    currentCpu += (targetCpu - currentCpu) * 0.2 + (Math.random() * 2 - 1);
+    currentRam += (targetRam - currentRam) * 0.1 + (Math.random() * 0.5 - 0.25);
+    currentDisk += (targetDisk - currentDisk) * 0.3 + (Math.random() * 5 - 2.5);
+
+    // Limitler (Eksiye düşmesini engelle)
+    if(currentCpu < 1) currentCpu = 1 + Math.random();
+    if(currentDisk < 0) currentDisk = 0;
+
+    if(cpuEl && ramEl && diskEl) {
+      cpuEl.innerText = Math.round(currentCpu);
+      ramEl.innerText = Math.round(currentRam);
+      diskEl.innerText = currentDisk.toFixed(1);
+
+      // Renklendirme
+      cpuEl.style.color = currentCpu > 60 ? "var(--red)" : (currentCpu > 30 ? "var(--yellow)" : "var(--green)");
+      diskEl.style.color = currentDisk > 100 ? "var(--accent)" : "var(--green)";
+    }
+  }, 500);
+
+  // Tarama Simülasyonu Veritabanı
+  const mockFiles = [
+    { name: 'disk-indexer', path: 'D:\\Projeler\\disk-indexer', type: 'Proje', color: '#00d4aa', bg: '#1d4d3e', icon: '&#128193;' },
+    { name: 'trading-brain', path: 'D:\\Projeler\\trading-brain', type: 'Proje', color: '#00d4aa', bg: '#1d4d3e', icon: '&#128193;' },
+    { name: 'yerli-dali-ui', path: 'D:\\Projeler\\yerli-dali-ui', type: 'Proje', color: '#00d4aa', bg: '#1d4d3e', icon: '&#128193;' },
+    { name: 'nmap-scanner', path: 'D:\\Projeler\\nmap-scanner', type: 'Arac', color: '#5ba3ff', bg: '#1a2e4a', icon: '&#128193;' },
+    { name: 'VLC.exe', path: 'D:\\Projeler\\VLC.exe', type: 'Arac', color: '#5ba3ff', bg: '#1a2e4a', icon: '&#128196;' },
+    { name: 'sunucu_loglari.txt', path: 'D:\\Projeler\\sunucu_loglari.txt', type: 'Belge', color: '#d47fd4', bg: '#3d1f3d', icon: '&#128196;' },
+    { name: 'WireGuard.pdf', path: 'D:\\Projeler\\WireGuard.pdf', type: 'Belge', color: '#d47fd4', bg: '#3d1f3d', icon: '&#128196;' },
+    { name: 'Mustang_1969.jpg', path: 'D:\\Projeler\\Mustang_1969.jpg', type: 'Medya', color: '#d4a04a', bg: '#3d2e1a', icon: '&#128444;' },
+    { name: 'Cr6_Slicer_Config.zip', path: 'D:\\Projeler\\Cr6_Slicer_Config.zip', type: 'Zip / Arsiv', color: '#8888a0', bg: '#2b2b36', icon: '&#128230;' },
+    { name: 'Eski_Yedek', path: 'D:\\Projeler\\Eski_Yedek', type: 'Cop', color: '#d45050', bg: '#3d1a1a', icon: '&#128465;' }
+  ];
+
+  let isScanning = false;
+
+  function startScan() {
+    if (isScanning) return;
+    isScanning = true;
+    
+    const btn = document.getElementById('scanBtn');
+    const tableBody = document.getElementById('tableBody');
+    const progBar = document.getElementById('scanProgress');
+    
+    // UI'yi Hazırla
+    btn.disabled = true;
+    btn.innerHTML = "&#8987; Taranıyor...";
+    tableBody.innerHTML = ""; // Tabloyu temizle
+    progBar.style.width = "0%";
+
+    // Sayaçları Sıfırla
+    const stats = { Total: 0, Proj: 0, Tool: 0, Doc: 0, Media: 0, Unk: 0 };
+    updateStats(stats);
+
+    // Donanımı Strese Sok (QThread çalışmaya başladı)
+    targetCpu = 75; 
+    targetRam = 180;
+    targetDisk = 450; // 450 MB/s Okuma hızı
+
+    let currentIndex = 0;
+    const totalFiles = mockFiles.length;
+
+    // Her dosyayı teker teker buluyormuş gibi aralıkla ekle
+    const scanInterval = setInterval(() => {
+      if (currentIndex >= totalFiles) {
+        clearInterval(scanInterval);
+        finishScan();
+        return;
+      }
+
+      const file = mockFiles[currentIndex];
+      
+      // Tabloya Satır Ekle (Animasyonlu)
+      const tr = document.createElement('tr');
+      tr.className = "new-row";
+      tr.innerHTML = `
+        <td>${file.icon} ${file.name}</td>
+        <td>${file.path}</td>
+        <td><span class="tag-chip" style="background:${file.bg};color:${file.color}">${file.type}</span></td>
+      `;
+      tableBody.appendChild(tr);
+
+      // İstatistikleri Güncelle
+      stats.Total++;
+      if (file.type === 'Proje') stats.Proj++;
+      else if (file.type === 'Arac') stats.Tool++;
+      else if (file.type === 'Belge') stats.Doc++;
+      else if (file.type === 'Medya') stats.Media++;
+      else stats.Unk++;
+      updateStats(stats);
+
+      // Progress Bar Güncelle
+      progBar.style.width = `${((currentIndex + 1) / totalFiles) * 100}%`;
+
+      currentIndex++;
+    }, 400); // Her 400ms'de bir yeni dosya bulsun
+  }
+
+  function finishScan() {
+    const btn = document.getElementById('scanBtn');
+    btn.disabled = false;
+    btn.innerHTML = "&#9654; Yeniden Tara";
+    
+    // Donanımı Soğut
+    targetCpu = 2;
+    targetRam = 55;
+    targetDisk = 0.0;
+    isScanning = false;
+  }
+
+  function updateStats(stats) {
+    document.getElementById('valTotal').innerText = stats.Total;
+    document.getElementById('valProj').innerText = stats.Proj;
+    document.getElementById('valTool').innerText = stats.Tool;
+    document.getElementById('valDoc').innerText = stats.Doc;
+    document.getElementById('valMedia').innerText = stats.Media;
+    document.getElementById('valUnk').innerText = stats.Unk;
+  }
+</script>
 
 </body>
 </html>
