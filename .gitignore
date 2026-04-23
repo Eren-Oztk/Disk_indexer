@@ -1,0 +1,33 @@
+# Secrets
+.env
+.env.local
+secrets.h
+credentials.h
+config.local.*
+*.key
+*.pem
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+dist/
+*.egg-info/
+build/
+
+# Index data (user-local)
+.disk_index.json

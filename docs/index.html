@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Disk Indeksi</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #080c10;
+      --surface:  #0d1117;
+      --surface2: #161b22;
+      --border:   #21262d;
+      --accent:   #6C63FF;
+      --accent2:  #00D4AA;
+      --text:     #e6edf3;
+      --text2:    #7d8590;
+      --proj:     #00D4AA;
+      --tool:     #5BA3FF;
+      --doc:      #D47FD4;
+      --media:    #D4A04A;
+      --zip:      #8888A0;
+      --trash:    #D45050;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Nav ─────────────────────────────────── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 48px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(8,12,16,0.92);
+      backdrop-filter: blur(10px);
+      z-index: 99;
+    }
+    nav .logo {
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      font-size: 1rem;
+      color: var(--accent);
+      letter-spacing: 2px;
+    }
+    nav a {
+      color: var(--text2);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color .2s;
+    }
+    nav a:hover { color: var(--text); }
+
+    /* ── Hero ────────────────────────────────── */
+    .hero {
+      text-align: center;
+      padding: 100px 24px 80px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .hero .badge {
+      display: inline-block;
+      background: rgba(108,99,255,.15);
+      color: var(--accent);
+      border: 1px solid rgba(108,99,255,.3);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 0.75rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      font-family: monospace;
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 3.8rem);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      color: var(--text2);
+      font-size: 1.1rem;
+      line-height: 1.7;
+      margin-bottom: 40px;
+    }
+    .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 28px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .2s, transform .15s;
+    }
+    .btn-primary:hover { background: #7d75ff; transform: translateY(-1px); }
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 28px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .2s;
+    }
+    .btn-secondary:hover { background: var(--border); }
+
+    /* ── Demo card ────────────────────────────── */
+    .demo-wrap {
+      max-width: 900px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
+    }
+    .window {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0,0,0,.5);
+    }
+    .window-bar {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot.r { background: #ff5f57; }
+    .dot.y { background: #febc2e; }
+    .dot.g { background: #28c840; }
+    .window-title {
+      flex: 1;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text2);
+      font-family: monospace;
+    }
+
+    /* Toolbar row */
+    .ui-toolbar {
+      background: #22222a;
+      border-bottom: 1px solid #35354a;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .ui-title { color: #6c63ff; font-weight: 700; font-size: 0.95rem; letter-spacing: 1px; }
+    .ui-input {
+      flex: 1;
+      background: #1a1a1f;
+      border: 1px solid #35354a;
+      border-radius: 6px;
+      padding: 5px 10px;
+      color: #e8e8f0;
+      font-family: monospace;
+      font-size: 0.8rem;
+    }
+    .ui-btn-p {
+      background: #6c63ff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 5px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .ui-btn-s {
+      background: #2a2a35;
+      color: #e8e8f0;
+      border: 1px solid #35354a;
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 0.8rem;
+    }
+
+    /* Stats row */
+    .stats-row {
+      background: #22222a;
+      border-bottom: 1px solid #35354a;
+      padding: 8px 16px;
+      display: flex;
+      gap: 0;
+    }
+    .stat-item { padding: 4px 18px; text-align: center; border-right: 1px solid #35354a; }
+    .stat-item:last-child { border-right: none; }
+    .stat-val { font-size: 1.1rem; font-weight: 600; }
+    .stat-lbl { font-size: 0.65rem; color: var(--text2); margin-top: 1px; }
+
+    /* Table */
+    .ui-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .ui-table th {
+      background: #22222a;
+      color: var(--text2);
+      padding: 7px 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.72rem;
+      letter-spacing: .5px;
+      border-bottom: 1px solid #35354a;
+    }
+    .ui-table td { padding: 6px 12px; border-bottom: 1px solid #1e1e28; }
+    .ui-table tr:nth-child(even) td { background: #22222a; }
+    .tag-chip {
+      display: inline-block;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    /* ── Sections ────────────────────────────── */
+    section { max-width: 900px; margin: 0 auto 80px; padding: 0 24px; }
+    section h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 32px;
+      color: var(--text);
+    }
+    section h2 span { color: var(--accent); }
+
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      transition: border-color .2s, transform .15s;
+    }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .card-icon { font-size: 1.6rem; margin-bottom: 12px; }
+    .card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
+    .card p { font-size: 0.85rem; color: var(--text2); line-height: 1.6; }
+
+    /* Tags grid */
+    .tags-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+    .tag-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .tag-card .name { font-weight: 600; margin-bottom: 6px; }
+    .tag-card .desc { font-size: 0.8rem; color: var(--text2); }
+
+    /* Install block */
+    .install-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .install-block .tab-bar {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+    }
+    .tab { padding: 10px 20px; font-size: 0.85rem; cursor: pointer; color: var(--text2); }
+    .tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+    pre {
+      padding: 20px 24px;
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.85rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      color: var(--text);
+    }
+    .c-green { color: #7ee787; }
+    .c-dim   { color: var(--text2); }
+    .c-acc   { color: var(--accent); }
+
+    /* ── Footer ──────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 32px 24px;
+      color: var(--text2);
+      font-size: 0.82rem;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="logo">DISK-INDEXER</span>
+  <a href="https://github.com/Eren-Oztk/disk-indexer">GitHub &rarr;</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="badge">v1.0.0 · Python + PyQt5</div>
+  <h1>Disk Indeksi</h1>
+  <p>Klasörlerini taşımadan indeksle, otomatik etiketle, filtrele, bul.<br>
+     Scan your folders without moving files — auto-tag, filter, find.</p>
+  <div class="hero-btns">
+    <a class="btn-primary" href="https://github.com/Eren-Oztk/disk-indexer/releases">Indir</a>
+    <a class="btn-secondary" href="https://github.com/Eren-Oztk/disk-indexer">GitHub</a>
+  </div>
+</section>
+
+<!-- DEMO WINDOW -->
+<div class="demo-wrap">
+  <div class="window">
+    <div class="window-bar">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <div class="window-title">Disk Indeksi — D:\Projeler</div>
+    </div>
+    <!-- Toolbar -->
+    <div class="ui-toolbar">
+      <span class="ui-title">Disk Indeksi</span>
+      <div class="ui-input">D:\Projeler</div>
+      <button class="ui-btn-s">Klasor Sec</button>
+      <button class="ui-btn-p">&#9654; Tara</button>
+    </div>
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-item"><div class="stat-val" style="color:#8888a0">12</div><div class="stat-lbl">Toplam</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:#00d4aa">5</div><div class="stat-lbl">Proje</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:#5ba3ff">2</div><div class="stat-lbl">Arac</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:#d47fd4">1</div><div class="stat-lbl">Belge</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:#d4a04a">2</div><div class="stat-lbl">Medya</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:#8888a0">2</div><div class="stat-lbl">Bilinmiyor</div></div>
+    </div>
+    <!-- Table -->
+    <table class="ui-table">
+      <thead>
+        <tr><th>Ad</th><th>Yol</th><th>Etiket</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>&#128193; disk-indexer</td><td>D:\Projeler\disk-indexer</td><td><span class="tag-chip" style="background:#1d4d3e;color:#00d4aa">Proje</span></td></tr>
+        <tr><td>&#128193; web-scraper</td><td>D:\Projeler\web-scraper</td><td><span class="tag-chip" style="background:#1d4d3e;color:#00d4aa">Proje</span></td></tr>
+        <tr><td>&#128196; VLC.exe</td><td>D:\Projeler\VLC.exe</td><td><span class="tag-chip" style="background:#1a2e4a;color:#5ba3ff">Arac</span></td></tr>
+        <tr><td>&#128193; Videolar</td><td>D:\Projeler\Videolar</td><td><span class="tag-chip" style="background:#3d2e1a;color:#d4a04a">Medya</span></td></tr>
+        <tr><td>&#128196; notlar.docx</td><td>D:\Projeler\notlar.docx</td><td><span class="tag-chip" style="background:#3d1f3d;color:#d47fd4">Belge</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section>
+  <h2>Ozellikler <span>//</span></h2>
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">&#128269;</div>
+      <h3>Otomatik Etiketleme</h3>
+      <p>Klasör içindeki dosyalara bakarak proje, araç, belge, medya gibi etiketleri otomatik atar.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#9889;</div>
+      <h3>Arka Plan Tarama</h3>
+      <p>QThread ile tarama UI'yi dondurmadan arka planda yürür; büyük dizinlerde bile akıcı çalışır.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128190;</div>
+      <h3>Kalici Kayit</h3>
+      <p>Etiketler <code>~/.disk_index.json</code> dosyasına kaydedilir. Hiçbir dosya taşınmaz veya silinmez.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#127759;</div>
+      <h3>Platformlar Arasi</h3>
+      <p>Windows, macOS ve Linux üzerinde çalışır. Explorer / Finder / xdg-open ile klasör açma desteği.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TAGS -->
+<section>
+  <h2>Etiket Turleri <span>//</span></h2>
+  <div class="tags-grid">
+    <div class="tag-card" style="border-color:#00d4aa44">
+      <div class="name" style="color:#00d4aa">Proje</div>
+      <div class="desc">.git, requirements.txt, package.json, main.py vb. içeren klasörler</div>
+    </div>
+    <div class="tag-card" style="border-color:#5ba3ff44">
+      <div class="name" style="color:#5ba3ff">Arac</div>
+      <div class="desc">installer, setup, .exe / .msi barındıran klasörler</div>
+    </div>
+    <div class="tag-card" style="border-color:#d47fd444">
+      <div class="name" style="color:#d47fd4">Belge</div>
+      <div class="desc">.pdf, .docx, .xlsx, .md ve diğer belge uzantıları</div>
+    </div>
+    <div class="tag-card" style="border-color:#d4a04a44">
+      <div class="name" style="color:#d4a04a">Medya</div>
+      <div class="desc">Resim, video, ses — .mp4, .jpg, .mp3 vb.</div>
+    </div>
+    <div class="tag-card" style="border-color:#8888a044">
+      <div class="name" style="color:#8888a0">Zip / Arsiv</div>
+      <div class="desc">.zip, .rar, .7z, .tar.gz ve diğer arşiv formatları</div>
+    </div>
+    <div class="tag-card" style="border-color:#d4505044">
+      <div class="name" style="color:#d45050">Cop</div>
+      <div class="desc">Manuel olarak işaretleyebileceğin öğeler</div>
+    </div>
+  </div>
+</section>
+
+<!-- INSTALL -->
+<section>
+  <h2>Kurulum <span>//</span></h2>
+  <div class="install-block">
+    <div class="tab-bar">
+      <div class="tab active">pip</div>
+      <div class="tab">Windows .bat</div>
+    </div>
+    <pre><span class="c-dim"># Repoyu klonla</span>
+<span class="c-green">git clone</span> https://github.com/Eren-Oztk/disk-indexer.git
+<span class="c-green">cd</span> disk-indexer
+
+<span class="c-dim"># Bagimlilik kur</span>
+<span class="c-green">pip install</span> -r requirements.txt
+
+<span class="c-dim"># Calistir</span>
+<span class="c-green">python</span> disk_indexer.py</pre>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  Built by <a href="https://github.com/Eren-Oztk">Eren-Oztk</a> &nbsp;&bull;&nbsp;
+  <a href="https://github.com/Eren-Oztk/disk-indexer">GitHub</a> &nbsp;&bull;&nbsp;
+  MIT License
+</footer>
+
+</body>
+</html>
