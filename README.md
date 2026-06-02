@@ -94,4 +94,4 @@ baslat.bat
 
 ## Lisans
 
-MIT © 2026 Eren Öztürk
+MIT © 2026 Eren Özatak
